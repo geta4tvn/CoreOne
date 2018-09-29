@@ -1,0 +1,4 @@
+﻿Template;TopLine;TopSector;TopSector2;TopSector3;TopSector4;TopSector5;TopSector6;TopSector7;Transactions;Total1;Total2;Total3;Total4;Total5;PayLine1;PayLine2;PayLine3;PayLine4;Footer1;Footer2;Footer3;Footer4;Footer5;Footer6;Footer7;Last
+1;*** FISCAL RECEIPT START *****;Logo;Header;Date-Time;Num-AccumNum;Clerk-Station;null;-----------------';show VAT;-------------------';Total;Qty-TaxTot;"""You were served by""-Clerk";null;Pmnt1-Amnt-Change;Pmnt2-Amnt-Change;Pmnt1-Amnt-Change;Pmnt1-Amnt-Change;==========';footer;QR;null ;null;null;logo;"""--- FISCAL RECEIPT END ---"""
+2;Null;Header;null;;;;;;;;;;;;;;;;;;;;;;;
+3;;;;;;;;;;;;;;;;;;;;;;;;;;

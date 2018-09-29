@@ -1,0 +1,21 @@
+﻿Type;fromModule;fromFnc;shorthand;num;descriptionEN;descriptionGR;descriptionSW;remedy
+Clerk;;;ClrkOpen;100;Cannot change clerk-Receipt Open;;;Close receipt first
+Clerk;;;ClrkDscnt;101;Discounts not allowed for this clerk;;;Ask supervisor login
+Clerk;;;ClrkRep;102;Reports not allowed for this clerk;;;Ask supervisor login
+Clerk;;;ClrkZ;103;Z not allowed for this clerk;;;Ask supervisor login
+Clerk;;;RTCoff;104;Cannot change date/time;;;Call Support
+Time;;;RTCbehind;200;Date/Time behind last Z's or Receipts;;;Call Support
+Time;;;24h;224;24h have passed with open receipt;;;Close receipt now, take Z
+Time;;;48h;248;48h have passed since last Z;;;Take Z
+Limits;;;MAXtot;300;Receipt total above MAX allowed;;;Ask supervisor login
+Limits;;;MAXprc;301;Item/Dpt price above MAX allowed;;;Ask supervisor login
+Limits;;;MAXdscnt;302;Discount above MAX allowed;;;Ask supervisor login
+System;;;SysFM;400;FM is not responding;;;Call Support
+System;;;SysBatM;401;Main battery Low;;;Put device to charge
+System;;;SysBatRTC;402;RTC battery low;;;Call Support
+Internet;;;NetWiFi;500;WiFi module not responding;;;Call Support
+Internet;;;NetMaint;501;Mainenance server not responding;;;Please try again
+Internet;;;NetTaxSrvr;502;Tax Server not responding;;;Please try again
+Printer;;;PrnDisc;600;Printer is disconnected;;;Call Support
+Printer;;;PrnPpr;601;Out of Paper;;;Insert Paper
+Printer;;;PrnHead;602;Printer head not positioned;;;Close printer lid
