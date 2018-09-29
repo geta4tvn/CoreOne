@@ -29,6 +29,10 @@ def InputKeys():
 #   THE actual transformations should be part of the static.sqlite and be read into lists on startup. In this way we can have multiple keyboard layouts
 #   Table keyblayouts in static.sqlite contains all COMMANDS and DATA mapped to key codes 0-29
 
+# I have opened account geta4tvn at github with passw Q2 and then installed git in Dell
+# Then used VCS > Import into version control > Share Project on GitHub where I successfuly created repository EngineOneCore
+#
+
 
 
     import CheckIn
