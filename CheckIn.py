@@ -23,8 +23,8 @@ from sqlite3 import Error
 
 #=======================================================================================================================
 #=======================    ACCESS THE TWO DATABASES: STATIC AND JOURNAL     ===========================================
-dbStatic='D:\\000 WORK 2017\\2 general\\00 2018 Tevin\\OUR ETR\\CharmSources\\static.sqlite'
-dbJournal='D:\\000 WORK 2017\\2 general\\00 2018 Tevin\\OUR ETR\\CharmSources\\journal.sqlite'
+dbStatic='C:\\000 WORK 2017\\2 general\\00 2018 Tevin\\OUR ETR\\CharmSources\\static.sqlite'
+dbJournal='C:\\000 WORK 2017\\2 general\\00 2018 Tevin\\OUR ETR\\CharmSources\\journal.sqlite'
 #======================  PATH TO USE IF IN  LINUX  =====================================================================
 #dbStatic='/usr/ecr/static.sqlite'
 #dbJournal='/usr/ecr/journal.sqlite'
@@ -144,10 +144,12 @@ class ReceiptId(object):
 # =================================================================================================================================
 # class phrase contains a SINGLE TRANSACTION ENTRY with all necessary variables needed for this line to be COMPLETE (to make sense)
 class phrase(object):
-    def __init__(self, Cmd, CmdId, Qty1, Qty2, PluCode, PluDesc, Dpt, Cat, Price, DiscountPrc, DiscountAm, UpPrc, 
+    def __init__(self, Cmd, CmdId, CustId, CustDat, Qty1, Qty2, PluCode, PluDesc, Dpt, Cat, Price, DiscountPrc, DiscountAm, UpPrc,
                  UpAm, Amnt, Comment):
         self.Cmd            = Cmd  # this is T, P, E, V, X, D, R, c, p all commands that are described in analysis
         self.CmdId          = CmdId  # this is the nn after command Tnn, Vnn etc so that for example if T, fetch from DPT# table nn dpt
+        self.CustId         = CustId # this is the customer code in case of INVOICING - customer code will retrieve cust info from db and update customer accouont
+        self.CustDat        = CustDat #customer data to be printed on the invoice (address, tel, company name etc
         self.Qty1           = Qty1  # we support qty X qty X price - this is Qty1, the first number before first X command
         self.Qty2           = Qty2  # this is second qty to support qty X qty
         self.PluCode        = PluCode  # this is the barcode or PLU code entered by scanner or manually

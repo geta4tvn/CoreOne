@@ -37,15 +37,25 @@ def InputKeys():
 
     import CheckIn
     import time
+    import sqlite3              # I need the sqlite here to read in from static.sqlite, table keyblayouts the mapping between hardware codes and commands
+    from sqlite3 import Error
 
     now = time.time()
 
-    folder='D:\\000 WORK 2017\\2 general\\00 2018 Tevin\\OUR ETR\\CharmSources\\'
+    folder='C:\\000 WORK 2017\\2 general\\00 2018 Tevin\\OUR ETR\\CharmSources\\'
     arxeio=folder+'TestKeysIn.txt'
     #time.sleep(1)
 
     # ======================================================================================================================================
     # This will read commands and data from a test input file (/CharmSources/TestKeysIn.txt) and separate the incoming data into tokens (numbers and commands)
+    # When using a test input file, we are using the commands and NOT THE KEYBOARD HARDWARE CODES to generate the input
+    # The COMMANDS understood by the system are described in CASH REGISTER ENGINE ANALYSIS.XLSX but are also given below:
+    # Tnn : department + nn two digit department code
+    # nnn..nnP : any number of digits in front of P: the PLU barcode/code
+    # nnn..nnX : any number of digits in front of X: quantity (3 decimals) multiplier
+    # nnn..nnr : any number of digits in front of r: price of PLU
+    # p<description>
+
     ReadFile=open(arxeio,"r")
     for line in ReadFile.readlines():
         for x in line:
