@@ -20,6 +20,8 @@
 
 import sqlite3
 from sqlite3 import Error
+import execution
+
 
 #=======================================================================================================================
 #=======================    ACCESS THE TWO DATABASES: STATIC AND JOURNAL     ===========================================
@@ -87,7 +89,7 @@ class SyState(object):
         J.execute("INSERT INTO state VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);",(self.OpMode, self.OpenRcpt, self.OpenRcptNum, self.OpenRcptTStamp, \
         self.OpenDay, self.TStamp, self.LastZTStamp, self.LastZ, self.ShutDn, self.Poff, self.BatLow, self.RTCLow, self.FMerr, \
         self.ClerkPerms, self.ClerkCode, self.PrnStat, self.WiFiStat, self.NetStat, self.DemoMode, self.Zpending))
-        JOURN.commit()
+        JOURN.commit() # it is JOURN.commit() and NOT J.commit(): commit() is a connection function, and J is the CURSOR, JOURN is the connection
 
 
         
@@ -395,6 +397,9 @@ def PassOn(a,b,c,d):
         SystemState.SaveCurStat()
     print('Command Code is:',c)
     print('================================================  THIS IS FROM THE DB:',d)
+    SystemState.OpMode=3
+    SystemState.OpenRcptTStamp='It is repeating 6 times!'
+    execution.ektelese(SystemState)  # TODO here is first attempt to pass a class object to another module
 
     return
 

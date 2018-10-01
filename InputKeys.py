@@ -67,7 +67,7 @@ def InputKeys():
 
     duration=int(1000*(stopped-now))
     print('THE WHOLE THING TOOK ',duration,'msec')
-    print(now, stopped)
+
 if __name__ == "__main__":
     InputKeys()
                     
