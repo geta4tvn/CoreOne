@@ -66,7 +66,7 @@ class SyState(object):
         self.ShutDn         = ShutDn        # 0 = no shutdown has occured, 1 = system has just booted from shutdn
         self.Poff           = Poff          # 0 = no power failure signal detected, 1 = power failure was raised and system was shutdown
         self.BatLow         = BatLow        # 0 = main battery OK, 1 = main battery please charge, 2 = main battery depleted, stop
-        self.RTClow         = RTCLow        # 0 = RTC battery OK, 1 = RTC battery low
+        self.RTCLow         = RTCLow        # 0 = RTC battery OK, 1 = RTC battery low
         self.FMerr          = FMerr         # 0 = No FM error, 1 = FM not detected, 2 = FM s/n invalid, 3 = FM read/write errors
         self.ClerkPerms     = ClerkPerms    # 0 = SALES no discnts/refunds, 1=all SALES, 2=Sales, X,  no Z - 3 = up to Z, 4 = GOD LEVEL, change time, erase...
         self.ClerkCode      = ClerkCode     # N where N = 1, 2, 3 etc active clerk code, enter 99 for clerk code capable of GOD LEVEL
@@ -87,7 +87,7 @@ class SyState(object):
         J.execute("INSERT INTO state VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);",(self.OpMode, self.OpenRcpt, self.OpenRcptNum, self.OpenRcptTStamp, \
         self.OpenDay, self.TStamp, self.LastZTStamp, self.LastZ, self.ShutDn, self.Poff, self.BatLow, self.RTCLow, self.FMerr, \
         self.ClerkPerms, self.ClerkCode, self.PrnStat, self.WiFiStat, self.NetStat, self.DemoMode, self.Zpending))
-        J.commit()
+        JOURN.commit()
 
 
         
@@ -171,7 +171,8 @@ class phrase(object):
         return
 
 global newline
-newline=phrase(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)
+newline=phrase(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)
+
 #-------------------------------------------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------------------------------------------
