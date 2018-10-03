@@ -25,8 +25,11 @@ import execution
 
 #=======================================================================================================================
 #=======================    ACCESS THE TWO DATABASES: STATIC AND JOURNAL     ===========================================
-dbStatic='C:\\000 WORK 2017\\2 general\\00 2018 Tevin\\OUR ETR\\CharmSources\\static.sqlite'
-dbJournal='C:\\000 WORK 2017\\2 general\\00 2018 Tevin\\OUR ETR\\CharmSources\\journal.sqlite'
+# dbStatic='C:\\000 WORK 2017\\2 general\\00 2018 Tevin\\OUR ETR\\CharmSources\\static.sqlite'
+# dbJournal='C:\\000 WORK 2017\\2 general\\00 2018 Tevin\\OUR ETR\\CharmSources\\journal.sqlite'
+dbStatic='C:\\Tevin\\CoreOne\\static.sqlite'
+dbJournal='C:\\Tevin\\CoreOne\\journal.sqlite'
+
 #======================  PATH TO USE IF IN  LINUX  =====================================================================
 #dbStatic='/usr/ecr/static.sqlite'
 #dbJournal='/usr/ecr/journal.sqlite'
