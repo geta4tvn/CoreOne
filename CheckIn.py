@@ -152,7 +152,7 @@ RcptIdentity=ReceiptId(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 # =================================================================================================================================
 # class phrase contains a SINGLE TRANSACTION ENTRY with all necessary variables needed for this line to be COMPLETE (to make sense)
 class phrase(object):
-    def __init__(self, Cmd, CmdId, CustId, CustDat, Qty1, Qty2, PluCode, PluDesc, Dpt, Cat, Price, DiscountPrc, DiscountAm, UpPrc,
+    def __init__(self, Cmd, CmdId, CustId, CustDat, Qty1, Qty2, PluCode, PluDesc, Dpt, DptDescr, Cat, Price, DiscountPrc, DiscountAm, UpPrc,
                  UpAm, Amnt, Comment):
         self.Cmd            = Cmd  # this is T, P, E, V, X, D, R, c, p all commands that are described in analysis
         self.CmdId          = CmdId  # this is the nn after command Tnn, Vnn etc so that for example if T, fetch from DPT# table nn dpt
@@ -163,6 +163,7 @@ class phrase(object):
         self.PluCode        = PluCode  # this is the barcode or PLU code entered by scanner or manually
         self.PluDesc        = PluDesc  # to be compatible with fiscal printer we can accept PLU description directly in the command line
         self.Dpt            = Dpt  # this is the nn in Tnn (the department code)
+        self.DptDescr       = DptDescr # this is the description of the department
         self.Cat            = Cat  # this is the code for category in case we want to support sales by category
         self.Price          = Price  # price of the PLU or DPT
         self.DiscountPrc    = DiscountPrc  # In case of % discount, this holds the Prcentage - !! the TYPE of discount is given in command Dnn, 01: immediate, 02: on subtotal, 03: ticket
@@ -179,7 +180,7 @@ class phrase(object):
         return
 
 global NewLine
-NewLine=phrase(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)
+NewLine=phrase(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)
 
 #-------------------------------------------------------------------------------------------------------------------
 
@@ -227,6 +228,9 @@ def fT(a,b):  # Department command function
     if dptData is None:
         return 'error DPT'
     else:
+        NewLine.Dpt=a
+        NewLine.DptDescr=dptData[0]
+
         return dptData
 
 #..........................................................................................
@@ -234,8 +238,9 @@ def fP(a,b):  # PLU command function
     global S
     S.execute("SELECT description, department, category, price1, active  FROM plu WHERE barcode=?", (b,))
     pluData = S.fetchone()
-    if pluData is not None:  # comparison with None is done using is / is not ERROR IF USE ==
+    if pluData is not None:  # comparison with None is done using is / is not. It is an ERROR IF we use ==
         active=pluData[4]
+
     if pluData is None:
         return 'error DPT'
     else:
@@ -376,7 +381,7 @@ def CheckIn(x):
             TokeNumPre=''
             TokeNumPre=TokeNumPre+x
             ActiveCmd=0
-            PassOn('empty', CmdIn, 'empty', QtyA)
+            PassOn(SystemState,RcptIdentity,NewLine)
 
 #--------------------------------------------------  if x is NOT Command but NOT a number also
     elif x not in Commands and not '-'< x <':':
@@ -396,7 +401,7 @@ def CheckIn(x):
 def PassOn(x,y,z):
 
     print('>>>>>>>>>>>>>>>  Pass to Execution')
-    print('>>>>>>>>>>>>>>>  x is the systemState object',x)
+    print('>>>>>>>>>>>>>>>  x is the SystemState object',x)
     print('>>>>>>>>>>>>>>>  y is the RcptIdentity object',y)
     print('>>>>>>>>>>>>>>>  z is the NewLine object', z)
 

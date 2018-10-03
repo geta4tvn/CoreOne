@@ -15,3 +15,8 @@ def ektelese(x,y,z):
     SystemState.SaveCurStat()
     print('I just executed a function belonging to a class from another module!!!!!!')
     print('Time Stamp is',SystemState.OpenRcptTStamp)
+    print('New Line gives QTY1=',NewLine.Qty1)
+    print('New Line gives Dept=', NewLine.Dpt)
+    print('New Line gives Description of Dpt=', NewLine.DptDescr)
+
+
