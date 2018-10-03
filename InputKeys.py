@@ -42,7 +42,7 @@ def InputKeys():
 
     now = time.time()
 
-    folder='C:\\000 WORK 2017\\2 general\\00 2018 Tevin\\OUR ETR\\CharmSources\\'
+    folder='C:\\Tevin\\CoreOne\\'
     arxeio=folder+'TestKeysIn.txt'
     #time.sleep(1)
 

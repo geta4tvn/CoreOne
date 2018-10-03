@@ -99,8 +99,8 @@ class SyState(object):
 
 global SystemState
 SystemState=SyState(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)
-NowStat=SystemState.ReadCurStat()
-print('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@   Status from db',NowStat)
+
+
 
 
 
@@ -169,14 +169,14 @@ class phrase(object):
         self.Amnt           = Amnt  # amount given from host PC in certain cases
         self.Comment        = Comment  # comment text entered by command c
 
-    # !! THIS SHOULD BE CALLED FOR ERROR CHECKS AFTER THE NEWLINE IS COMPLETE AND JUST BEFORE PASSED TO EXECUTE
+    # !! THIS SHOULD BE CALLED FOR ERROR CHECKS AFTER THE NewLine IS COMPLETE AND JUST BEFORE PASSED TO EXECUTE
     def ErrorCheck(self):
         global S
         S.execute("SELECT from dpt VATclas WHERE dptCode='01'")
         return
 
-global newline
-newline=phrase(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)
+global NewLine
+NewLine=phrase(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)
 
 #-------------------------------------------------------------------------------------------------------------------
 
@@ -250,11 +250,11 @@ def fE():  # END/CLOSE receipt command function
 
 #..........................................................................................
 def fX(a,b):  # QUANTITY/MULTIPL command function
-    global newline
-    if newline.Qty1==0:
-        newline.Qty1=b
+    global NewLine
+    if NewLine.Qty1==0:
+        NewLine.Qty1=b
     else:
-        newline.Qty2=b
+        NewLine.Qty2=b
     return
 
 
@@ -351,19 +351,19 @@ def CheckIn(x):
         endCmd=Commands[x][2]
         if postCmd==0:
             dataInDb=Commands[CmdIn][3](x,TokeNumPre)
-            PassOn(TokeNumPre, CmdIn, CmdInCode, dataInDb)
+            if endCmd==0:       # if the command is NOT ending the transaction (like the X) then  you do not passon anything, wait for a command that is capable of ending
+                PassOn(NewLine)
 
 
 #------------------------------------------------- if x is NOT Command but a number  // HANDLES Tnn or commands that have POST codes
     elif x not in Commands and '-'< x <':': # the input will EITHER contain COMMAND or DATA
-        if ActiveCmd==0:
-            TokeNumPre=TokeNumPre+x
+        if ActiveCmd==0:  # if there is no command received, we assume that we need to gather the data as some number
+            TokeNumPre=TokeNumPre+x # and store it in TokeNumPre, which is the PRE-COMMAND NUMBER
         elif ActiveCmd==1 and postCmd!=0: # this is after T, V, E commands that take nn or nnnn arguments
-            CmdInCode=CmdInCode+x
+            CmdInCode=CmdInCode+x         # in this case, we are dealing with a POST-COMMAND ID
             postCmd=postCmd-1
-            if postCmd==0 and endCmd==0:    # this is X case
+            if postCmd==0 and endCmd==0:
                 dataInDb=Commands[CmdIn][3](CmdInCode,TokeNumPre) # ERROR CHECK HERE: based on the command function returned by Commands[CmdIn][3](params)
-                PassOn(TokeNumPre, CmdIn, CmdInCode, dataInDb)
                 ActiveCmd=0
                 TokeNumPre=''
                 CmdIn=''
@@ -393,28 +393,13 @@ def CheckIn(x):
 def PassOn(a,b,c,d):
 
     print('>>>>>>>>>>>>>>>  Pass to Execution')
-    print('Pre command number:',a)
-    print('Command is',b)
-    if b=='X':
-        SystemState.OpenRcptTStamp='12355555555'
-        SystemState.SaveCurStat()
-    print('Command Code is:',c)
-    print('================================================  THIS IS FROM THE DB:',d)
-    SystemState.OpMode=3
-    SystemState.OpenRcptTStamp='It is repeating 6 times!'
+    print('>>>>>>>>>>>>>>>  Pre command number:',a)
+    print('>>>>>>>>>>>>>>>  Command is',b)
+
     execution.ektelese(SystemState)  # TODO here is first attempt to pass a class object to another module
 
     return
 
-
-
-def PhrasePass(a,b,c,d):
-    global QtyA
-    QtyA=1
-    if b=='X':
-        QtyA=a
-
-    return
 
 
 #-------------------------------------  END OF MODULE CheckIn.py ---------------------------------------------------------
