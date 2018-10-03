@@ -4,8 +4,10 @@ from sqlite3 import Error
 def ektelese(x,y,z):
     global SystemState
     SystemState=x
+    global RcptIdentity
+    RcptIdentity=y
     global NewLine
-    NewLine=y
+    NewLine=z
 
     print('-------  we are in execution.ektelese()')
 

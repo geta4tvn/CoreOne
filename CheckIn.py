@@ -143,6 +143,9 @@ class ReceiptId(object):
         self.PayDcode       = PayDcode  # payment code D
         self.PayD           = PayD      # the amount paid under code D
 
+global RcptIdentity
+RcptIdentity=ReceiptId(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)
+
 
 #=======================================================================================================================
 
@@ -361,7 +364,7 @@ def CheckIn(x):
             TokeNumPre=TokeNumPre+x # and store it in TokeNumPre, which is the PRE-COMMAND NUMBER
         elif ActiveCmd==1 and postCmd!=0: # this is after T, V, E commands that take nn or nnnn arguments
             CmdInCode=CmdInCode+x         # in this case, we are dealing with a POST-COMMAND ID
-            postCmd=postCmd-1
+            postCmd=postCmd-1 # postCmd starts from elif with a value >0 and then as chars get input, postCmd is decremented and when it reaches 0 it means we are done with this
             if postCmd==0 and endCmd==0:
                 dataInDb=Commands[CmdIn][3](CmdInCode,TokeNumPre) # ERROR CHECK HERE: based on the command function returned by Commands[CmdIn][3](params)
                 ActiveCmd=0
@@ -390,13 +393,14 @@ def CheckIn(x):
 
 # TODO do not leave checkin unless the command entered is an "ending" command, for example X does not leave here, T01 will leave
 
-def PassOn(a,b,c,d):
+def PassOn(x,y,z):
 
     print('>>>>>>>>>>>>>>>  Pass to Execution')
-    print('>>>>>>>>>>>>>>>  Pre command number:',a)
-    print('>>>>>>>>>>>>>>>  Command is',b)
+    print('>>>>>>>>>>>>>>>  x is the systemState object',x)
+    print('>>>>>>>>>>>>>>>  y is the RcptIdentity object',y)
+    print('>>>>>>>>>>>>>>>  z is the NewLine object', z)
 
-    execution.ektelese(SystemState)  # TODO here is first attempt to pass a class object to another module
+    execution.ektelese(SystemState,RcptIdentity,NewLine)  # TODO here is first attempt to pass a class object to another module
 
     return
 
