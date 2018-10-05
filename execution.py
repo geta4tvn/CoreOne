@@ -11,7 +11,7 @@ def ektelese(x,y,z):
 
     print('-------  we are in execution.ektelese()')
 
-
+    SystemState.OpenRcpt=1900
     SystemState.SaveCurStat()
     print('I just executed a function belonging to a class from another module!!!!!!')
     print('Time Stamp is',SystemState.OpenRcptTStamp)

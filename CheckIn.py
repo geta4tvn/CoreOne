@@ -60,7 +60,7 @@ J=JOURN.cursor()
 class SyState(object):
     def __init__(self, OpMode, OpenRcpt, OpenRcptNum, OpenRcptTStamp, OpenDay, TStamp, LastZTStamp, LastZ, ShutDn, Poff, BatLow, RTCLow, FMerr, \
                  ClerkPerms, ClerkCode, PrnStat, WiFiStat, NetStat, DemoMode, Zpending):   # 20 columns
-        self.OpMode         = OpMode        # 0 = in menu, standby, 1=in SALES, 2= in REPORTS, 3= in PROGRAMMING
+        self.OpMode         = OpMode        # 0 = in menu, standby in sales, 1=in REPORTS, 2= in PROGRAMMING
         self.OpenRcpt       = OpenRcpt      # 0 = no open receipt, 1=receipt is open
         self.OpenRcptNum    = OpenRcptNum   # NNNN = the accumulated receipt num
         self.OpenRcptTStamp = OpenRcptTStamp # this is the RECEIPT's timestamp which is used for ejournal storage and printed ON PAPER
@@ -82,10 +82,31 @@ class SyState(object):
         self.Zpending       = Zpending      # 0 = no pending Z, last Z completed OK,  1 = Z not completed due to errors, needs to be re-printed
 
     def ReadCurStat(self):
+        #IMPORTANT: to read into the object you have to do it one attribute at a time like self.attri=readlist[n]
         global J
         J.execute("SELECT * FROM state WHERE ROWID=(SELECT MAX(ROWID) FROM state)")
         LastState=J.fetchone()
-        return LastState
+        self.OpMode         = LastState[0]
+        self.OpenRcpt       = LastState[1]              # 0 = no open receipt, 1=receipt is open
+        self.OpenRcptNum    = LastState[2]               # NNNN = the accumulated receipt num
+        self.OpenRcptTStamp = LastState[3]                # this is the RECEIPT's timestamp which is used for ejournal storage and printed ON PAPER
+        self.OpenDay        = LastState[4]            # 0 = no open day, 1 = open day
+        self.TStamp         = LastState[5]                # system's time stamp in integer seconds when this record is updated
+        self.LastZTStamp    = LastState[6]           # system's time stamp of the time last Z was taken
+        self.LastZ          = LastState[7]                 # Last Z's number, this is a FINISHED CORRECTLY Z - if Z is interrupted (flag Zpending=1) LastZ is NOT updated
+        self.ShutDn         = LastState[8]                # 0 = no shutdown has occured, 1 = system has just booted from shutdn
+        self.Poff           = LastState[9]                  # 0 = no power failure signal detected, 1 = power failure was raised and system was shutdown
+        self.BatLow         = LastState[10]                # 0 = main battery OK, 1 = main battery please charge, 2 = main battery depleted, stop
+        self.RTCLow         = LastState[11]                # 0 = RTC battery OK, 1 = RTC battery low
+        self.FMerr          = LastState[12]                 # 0 = No FM error, 1 = FM not detected, 2 = FM s/n invalid, 3 = FM read/write errors
+        self.ClerkPerms     = LastState[13]            # 0 = SALES no discnts/refunds, 1=all SALES, 2=Sales, X,  no Z - 3 = up to Z, 4 = GOD LEVEL, change time, erase...
+        self.ClerkCode      = LastState[14]             # N where N = 1, 2, 3 etc active clerk code, enter 99 for clerk code capable of GOD LEVEL
+        self.PrnStat        = LastState[15]               # 0 = no error, 1 = PaperEnd, 2 = head up, 3 = overheat, 4 = disconnected
+        self.WiFiStat       = LastState[16]              # 0 = connected OK, 1 = no network, 2 = cannot login, 3 = no internet access
+        self.NetStat        = LastState[17]               # 0 = connected to internet, access to maintenance server, 1 = internet OK, no maint server, 2...
+        self.DemoMode       = LastState[18]              # 0 = normal fiscal operation, 1 = demo mode, do not write to FM, ignore all FM related errors
+        self.Zpending       = LastState[19]             # 0 = no pending Z, last Z completed OK,  1 = Z not completed due to errors, needs to be re-printed
+        return
 
     def SaveCurStat(self):
         global J
@@ -98,8 +119,12 @@ class SyState(object):
         
 
 global SystemState
-SystemState=SyState(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)
+SystemState=SyState(0,82,90,10,45670,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)  #first you define the object and THEN you use the class function
+SystemState.ReadCurStat()  # if you do NOT define SystemState as an instance of the SyState class, then you get error SystemState not defined (dah!)
 
+print('sdfs',SystemState.OpenRcpt)
+#print('all attributes of an object',vars(SystemState))
+#print('Open Receipt flag is=',dir(SystemState))
 
 
 
@@ -401,10 +426,6 @@ def CheckIn(x):
 def PassOn(x,y,z):
 
     print('>>>>>>>>>>>>>>>  Pass to Execution')
-    print('>>>>>>>>>>>>>>>  x is the SystemState object',x)
-    print('>>>>>>>>>>>>>>>  y is the RcptIdentity object',y)
-    print('>>>>>>>>>>>>>>>  z is the NewLine object', z)
-
     execution.ektelese(SystemState,RcptIdentity,NewLine)  # TODO here is first attempt to pass a class object to another module
 
     return
