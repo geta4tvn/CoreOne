@@ -20,7 +20,7 @@
 
 import sqlite3
 from sqlite3 import Error
-import execution
+import Execution
 
 
 #=======================================================================================================================
@@ -119,10 +119,11 @@ class SyState(object):
         
 
 global SystemState
-SystemState=SyState(0,82,90,10,45670,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)  #first you define the object and THEN you use the class function
+SystemState=SyState(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)  #first you define the object and THEN you use the class function
 SystemState.ReadCurStat()  # if you do NOT define SystemState as an instance of the SyState class, then you get error SystemState not defined (dah!)
+# the ReadCurStat() function is a METHOD in the SyState class and therefore when called with an object of this class takes as arguments all the attributes of the object
 
-print('sdfs',SystemState.OpenRcpt)
+print('This system state OpenRcpt flag is read from db:',SystemState.OpenRcpt)
 #print('all attributes of an object',vars(SystemState))
 #print('Open Receipt flag is=',dir(SystemState))
 
@@ -132,8 +133,11 @@ print('sdfs',SystemState.OpenRcpt)
 
 # ============================================================================================================================
 # class ReceiptId contains top and end receipt parameters and totals
+# Ammended 7 October 2018 to reflect KENYA TIMS requirements also, like Transmission Time Stamp (TStampTx), MiddleWareInvoiceNumber etc
+# KENYA TIMS use JSON structure taken from TIMS Protocol to Server.xlsx from /ELZAB HELLAS/Africa/Kenya/0 K10
+
 class ReceiptId(object):
-    def __init__(self, Num, AccuNum, DocType, Z, Clerk, Station, TStamp, Date, Time, HashA, HashE, Approv, CustTIN, CustName, CustType,
+    def __init__(self, Num, AccuNum, DocType, Z, Clerk, Station, TStamp, Date, Time, TStampTx, HashA, HashE, Approv, CustTIN, CustName, CustType,
                  CustAddr, GPS, Total, TotVATa, TotVATb, TotVATc, TotVATd, TotVATe, TotVATf, PayAcode, PayA, PayBcode, PayB, PayCcode, PayC, PayDcode, PayD):
         self.Num            = Num       # this is the daily number of receipt
         self.AccuNum        = AccuNum   # this is the accumulated number of receipt
@@ -144,6 +148,7 @@ class ReceiptId(object):
         self.TStamp         = TStamp    #TimeStamp of the system is the MAIN time used, with date and time DERIVED from TStamp
         self.Date           = Date      # current date to be printed on receipt
         self.Time           = Time      # time to be printed on receipt
+        self.TStampTx       = TStampTx   # KENYA Date of Transmission in form of timestamp / this can be different from TStamp, which is the date of TRANSCACTION not transmission
         self.HashA          = HashA     # the SHA-1 or SHA-256 value of the receipt's data (_a.txt data)
         self.HashE          = HashE     # the SHA-1 value of the receipt's numerical data (_e.txt data)
         self.Approv         = Approv    # any approval code
@@ -169,34 +174,57 @@ class ReceiptId(object):
         self.PayD           = PayD      # the amount paid under code D
 
 global RcptIdentity
-RcptIdentity=ReceiptId(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)
+RcptIdentity=ReceiptId(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)
 
 
 #=======================================================================================================================
 
 # =================================================================================================================================
 # class phrase contains a SINGLE TRANSACTION ENTRY with all necessary variables needed for this line to be COMPLETE (to make sense)
+# This class is stored into log table for every transaction line
 class phrase(object):
-    def __init__(self, Cmd, CmdId, CustId, CustDat, Qty1, Qty2, PluCode, PluDesc, Dpt, DptDescr, Cat, Price, DiscountPrc, DiscountAm, UpPrc,
-                 UpAm, Amnt, Comment):
-        self.Cmd            = Cmd  # this is T, P, E, V, X, D, R, c, p all commands that are described in analysis
-        self.CmdId          = CmdId  # this is the nn after command Tnn, Vnn etc so that for example if T, fetch from DPT# table nn dpt
-        self.CustId         = CustId # this is the customer code in case of INVOICING - customer code will retrieve cust info from db and update customer accouont
-        self.CustDat        = CustDat #customer data to be printed on the invoice (address, tel, company name etc
-        self.Qty1           = Qty1  # we support qty X qty X price - this is Qty1, the first number before first X command
-        self.Qty2           = Qty2  # this is second qty to support qty X qty
-        self.PluCode        = PluCode  # this is the barcode or PLU code entered by scanner or manually
-        self.PluDesc        = PluDesc  # to be compatible with fiscal printer we can accept PLU description directly in the command line
-        self.Dpt            = Dpt  # this is the nn in Tnn (the department code)
-        self.DptDescr       = DptDescr # this is the description of the department
-        self.Cat            = Cat  # this is the code for category in case we want to support sales by category
-        self.Price          = Price  # price of the PLU or DPT
-        self.DiscountPrc    = DiscountPrc  # In case of % discount, this holds the Prcentage - !! the TYPE of discount is given in command Dnn, 01: immediate, 02: on subtotal, 03: ticket
-        self.DiscountAm     = DiscountAm  # In case of amount discount, this holds the amount
-        self.UpPrc          = UpPrc  # in case of % markup, this holds the Prcentage
-        self.UpAm           = UpAm  # in case of amount markup, this holds the Prcentage
-        self.Amnt           = Amnt  # amount given from host PC in certain cases
-        self.Comment        = Comment  # comment text entered by command c
+    def __init__(self, DocNum, LineNum, LineTransType, LineCommand, LineCmdId, LineQty1, LineQty2, LinePluCode, LinePluDesc, LineHSCode, LineHSDesc, \
+                 LineDptCode, LineDptDesc, LineCat, LineUnitPrice, LineSubTotal, LineDiscPerc, LineDiscAm, LineUpPerc, LineUpAm, LineComment, \
+                 LineQR, LineTotAmnt, LineTaxRate, LineAuxTax, LineTaxAmnt, LineTotTaxable, LinePlainText, Pay1Amnt, Pay1Descr, Pay2Amnt, Pay2Descr, \
+                 Pay3Amnt, Pay3Descr, Pay4Amnt, Pay4Descr):
+        self.DocNum                 = DocNum            # the number of the receipt to which this line belongs to
+        self.LineNum                = LineNum           # this is the line number
+        self.LineTransType          = LineTransType     # KENYA TIMS this is supposed to be 1 for normal, 2 void, 3 refund, 4 cancel
+        self.LineCommand            = LineCommand       # for example T, E, R, ...
+        self.LineCmdId              = LineCmdId         # the nn after command, 01 if T01 etc...
+        self.LineQty1               = LineQty1          # the 123.456 quantity before X
+        self.LineQty2               = LineQty2          # in case of double X in the transaction, like 5 cases of 12 bottles
+        self.LinePluCode            = LinePluCode       # the barcode entered for PLU
+        self.LinePluDesc            = LinePluDesc       # description of the PLU, either from database OR from host PC
+        self.LineHSCode             = LineHSCode        # KENYA TIMS compatibility, HSDescription for the PLU
+        self.LineHSDesc             = LineHSDesc        # KENYA TIMS compatibility
+        self.LineDptCode            = LineDptCode       # the nn from Tnn
+        self.LineDptDesc            = LineDptDesc       # dpt description
+        self.LineCat                = LineCat           # category entry IF needed
+        self.LineUnitPrice          = LineUnitPrice     # unit price
+        self.LineSubTotal           = LineSubTotal      # is S command, calculates subtotal up to this line
+        self.LineDiscPerc           = LineDiscPerc      # The % Discount - command ID will further dictate how to apply
+        self.LineDiscAm             = LineDiscAm        # The amount of the discount
+        self.LineUpPerc             = LineUpPerc        # The % markup
+        self.LineUpAm               = LineUpAm          # amount markup
+
+        self.LineComment            = LineComment       # the nn after command, 01 if T01 etc...
+        self.LineQR                 = LineQR            # the QR code
+        self.LineTotAmnt            = LineTotAmnt       # total amount for this line
+        self.LineTaxRate            = LineTaxRate       # the tax rate as read from db via PLU or DPT
+        self.LineAuxTax             = LineAuxTax        # some other tax possible - for example service tax or sales tax
+        self.LineTaxAmnt            = LineTaxAmnt       # the  tax amount for this line
+        self.LineTotTaxable         = LineTotTaxable    # KENYA TIMS compatibility for json, the taxable total of the line
+        self.LinePlainText          = LinePlainText     # AS IT IS PRINTED - to be able to create and sign the _a file
+
+        self.Pay1Amnt               = Pay1Amnt          # if this is a payment line, the amount of 1st payment
+        self.Pay1Descr              = Pay1Descr         # description of payment type
+        self.Pay2Amnt               = Pay2Amnt          #
+        self.Pay2Descr              = Pay2Descr         #
+        self.Pay3Amnt               = Pay3Amnt          #
+        self.Pay3Descr              = Pay3Descr         #
+        self.Pay4Amnt               = Pay4Amnt          # UP TO 4 different payments to close the receipt
+        self.Pay4Descr              = Pay4Descr         #
 
     # !! THIS SHOULD BE CALLED FOR ERROR CHECKS AFTER THE NewLine IS COMPLETE AND JUST BEFORE PASSED TO EXECUTE
     def ErrorCheck(self):
@@ -205,7 +233,7 @@ class phrase(object):
         return
 
 global NewLine
-NewLine=phrase(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)
+NewLine=phrase(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)
 
 #-------------------------------------------------------------------------------------------------------------------
 
@@ -426,7 +454,7 @@ def CheckIn(x):
 def PassOn(x,y,z):
 
     print('>>>>>>>>>>>>>>>  Pass to Execution')
-    execution.ektelese(SystemState,RcptIdentity,NewLine)  # TODO here is first attempt to pass a class object to another module
+    Execution.ektelese(SystemState, RcptIdentity, NewLine)  # TODO here is first attempt to pass a class object to another module
 
     return
 
