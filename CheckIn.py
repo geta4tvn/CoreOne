@@ -217,14 +217,15 @@ class phrase(object):
         self.LineTotTaxable         = LineTotTaxable    # KENYA TIMS compatibility for json, the taxable total of the line
         self.LinePlainText          = LinePlainText     # AS IT IS PRINTED - to be able to create and sign the _a file
 
-        self.Pay1Amnt               = Pay1Amnt          # if this is a payment line, the amount of 1st payment
-        self.Pay1Descr              = Pay1Descr         # description of payment type
-        self.Pay2Amnt               = Pay2Amnt          #
-        self.Pay2Descr              = Pay2Descr         #
-        self.Pay3Amnt               = Pay3Amnt          #
-        self.Pay3Descr              = Pay3Descr         #
-        self.Pay4Amnt               = Pay4Amnt          # UP TO 4 different payments to close the receipt
-        self.Pay4Descr              = Pay4Descr         #
+#Decided to split the log table into TWO tables: the first, InvoiceId, will have header, footer and payments, while the second, InvoiceLines, is this one
+        # self.Pay1Amnt               = Pay1Amnt          # if this is a payment line, the amount of 1st payment
+        # self.Pay1Descr              = Pay1Descr         # description of payment type
+        # self.Pay2Amnt               = Pay2Amnt          #
+        # self.Pay2Descr              = Pay2Descr         #
+        # self.Pay3Amnt               = Pay3Amnt          #
+        # self.Pay3Descr              = Pay3Descr         #
+        # self.Pay4Amnt               = Pay4Amnt          # UP TO 4 different payments to close the receipt
+        # self.Pay4Descr              = Pay4Descr         #
 
     # !! THIS SHOULD BE CALLED FOR ERROR CHECKS AFTER THE NewLine IS COMPLETE AND JUST BEFORE PASSED TO EXECUTE
     def ErrorCheck(self):
