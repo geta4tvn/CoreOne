@@ -21,6 +21,8 @@
 import sqlite3
 from sqlite3 import Error
 import Execution
+import AllJournalClasses
+
 
 
 #=======================================================================================================================

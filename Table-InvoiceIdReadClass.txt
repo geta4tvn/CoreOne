@@ -1,0 +1,61 @@
+self.Znum			= ListFetchOne[0]		# this is the Z number where this receipt/invoice belongs to (pending to be issued)
+self.DocNum			= ListFetchOne[1]		# the serial number of this receipt/invoice for this Z (starts at 1 every new Z)
+self.DocNumAccum		= ListFetchOne[2]		# accumulating serial number of this rece/inv since installation - KEY to fetch all the LINES of this receipt/inv from InvoiceLines
+self.DocNumMiddleware		= ListFetchOne[3]		# KENYA TIMS this is the accumulating s/n of rec/inv with added Middleware ID
+self.IsOpen			= ListFetchOne[4]		# 1=means this doc is open still, payment is pending, storage is pending, 0=closed
+self.IsCancelled 		= ListFetchOne[5]		# 1=means this doc is canceled so all lines were re-written with ZERO and total is ZERO but NUMBERING continues
+self.InvType			= ListFetchOne[6]		# KENYA TIMS 0=PROTOTYPE, 1=COPY, …???
+self.InvCategory		= ListFetchOne[7]		# KENYA TIMS 0=RETAIL RECEIPT, 1=INVOICE, 2=CREDIT NOTE
+self.RelatedNum			= ListFetchOne[8]		# KENYA TIMS, if this is a CREDIT NOTE, here you need to have the DocNumAccum of the invoice which is credited
+self.ClerkCode			= ListFetchOne[9]		# The code of operator
+self.ClerkName			= ListFetchOne[10]		# The name of operator, we need both here to keep record of clerks when names change on same clerk code…
+self.TimeStamp			= ListFetchOne[11]		# Time stamp of first creation of this doc
+self.Date			= ListFetchOne[12]		# Derived date in DD-MM-YYYY from TimeStamp
+self.Time			= ListFetchOne[13]		# Derived time in HH:MM:SS from TimeStamp
+self.TimeStampTransm		= ListFetchOne[14]		# KENYA TIMS, time stamp when this doc was transmitted to server
+self.PinOfBuyer			= ListFetchOne[15]		# KENYA TIMS, pin of buyer
+self.CustCode			= ListFetchOne[16]		# Customer / Buyer code in our database
+self.CustName			= ListFetchOne[17]		# customer name details from our database
+self.CustType			= ListFetchOne[18]		# type of customer, like shop, distributor, ???
+self.CustDetails		= ListFetchOne[19]		# Customer address, phone number etc on an invoice
+self.Location			= ListFetchOne[20]		# GPS coordinates from GPS module??? Or simply location where the invoice was issued for truck invoicing
+self.TotalPcs			= ListFetchOne[21]		# Total pieces if goods are counted in pieces
+self.TotalQty			= ListFetchOne[22]		# total quantity in Kgr
+self.TaxVatA			= ListFetchOne[23]		# tax amount for VAT A = TotalTaxableA * the VATA% currently in force - the VAT% may change later on, this is why we store both
+self.TaxVatB			= ListFetchOne[24]		# tax amount for VAT B
+self.TaxVatC			= ListFetchOne[25]		# tax amount for VAT C
+self.TaxVatD			= ListFetchOne[26]		# tax amount for VAT D
+self.TaxVatE			= ListFetchOne[27]		# tax amount for VAT E
+self.TaxVatExempt		= ListFetchOne[28]		# tax amount for VAT Ex
+self.TaxAux			= ListFetchOne[29]		# tax amount for Tax
+self.TotalAmntBefDiscnt		= ListFetchOne[30]		# this is actually TotalAmountPayable + TotalDiscnts
+self.TotalDiscnts		= ListFetchOne[31]		# the sum total of discounts as entered in InvoiceLines
+self.TotalAmountPayable		= ListFetchOne[32]		# this is gross amount to be paid, including cost of goods and all taxes IN THE DEFAULT CURRENCY
+self.TotalAmntPbleCurB		= ListFetchOne[33]		# total payable in alternative currency
+self.CurrencyBRate		= ListFetchOne[34]		# the current conversion rate from base currency to alt currency
+self.CoinQRforPayment		= ListFetchOne[35]		# in case alt currency is a CRYPTOCOIN, this QR code will be needed to effect the payment using mobile wallet
+self.TotalTaxableA		= ListFetchOne[36]		# 
+self.TotalTaxableB		= ListFetchOne[37]		# 
+self.TotalTaxableC		= ListFetchOne[38]		# 
+self.TotalTaxableD		= ListFetchOne[39]		# 
+self.TotalTaxableE		= ListFetchOne[40]		# 
+self.TotalTax 			= ListFetchOne[41]		# 
+self.Pay1Amnt			= ListFetchOne[42]		# payment amount
+self.Pay1Descr			= ListFetchOne[43]		# payment code and description or just description
+self.Change			= ListFetchOne[44]		# if Pay1Amnt is > TotalAmountPayable, system will calculate Change to return to customer
+self.Pay2Amnt			= ListFetchOne[45]		# second payment in case payment is spread into more than a single payment
+self.Pay2Descr			= ListFetchOne[46]		# description of second payment or code+description
+self.Pay3Amnt			= ListFetchOne[47]		# third payment if needed
+self.Pay3Desc			= ListFetchOne[48]		# same
+self.CouponId			= ListFetchOne[49]		# the ID or code number of the coupon presented for a discount or form of payment
+self.CouponAmnt			= ListFetchOne[50]		# the amount in that coupon
+self.LoyaltyEarned		= ListFetchOne[51]		# lolyalty points credited to this customer
+self.AmountOnCredit		= ListFetchOne[52]		# in case credit is given, the amount on credit
+self.CheckNum			= ListFetchOne[53]		# if a check is given, the check number
+self.DueDateforPayment		= ListFetchOne[54]		# the date due for payment
+self.HashA			= ListFetchOne[55]		# you need to form _a.txt DYNAMICALLY by combining the text(HeaderCode)+Top+Lines+text(FooterCode)
+self.HashE			= ListFetchOne[56]		# GREECE ONLY - the _e.txt hash value
+self.QRCode			= ListFetchOne[57]		# KENYA TIMS see how to form this / GR is a different thing
+self.HeaderCode			= ListFetchOne[58]		# Read the actual text used in this receipt from static.headers - you need this text for do the _a.txt and HashA
+self.FooterCode			= ListFetchOne[59]		# Read the actual text used in this receipt from static.footers - you need this text to do the _a.txt and HashA
+self.FullAText			= ListFetchOne[60]		# GREECE ONLY - this is the PRINTED _a.txt - KENYA TIMS will use JSON, perhaps we can put the json text here
