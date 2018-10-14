@@ -4,7 +4,7 @@ self.DocNumAccum		= ListFetchOne[2]		# accumulating serial number of this rece/i
 self.DocNumMiddleware		= ListFetchOne[3]		# KENYA TIMS this is the accumulating s/n of rec/inv with added Middleware ID
 self.IsOpen			= ListFetchOne[4]		# 1=means this doc is open still, payment is pending, storage is pending, 0=closed
 self.IsCancelled 		= ListFetchOne[5]		# 1=means this doc is canceled so all lines were re-written with ZERO and total is ZERO but NUMBERING continues
-self.InvType			= ListFetchOne[6]		# KENYA TIMS 0=PROTOTYPE, 1=COPY, …???
+self.InvType			= ListFetchOne[6]		# KENYA TIMS 0=PROTOTYPE, 1=COPY, … 9=TEMPORARY PARTIAL RECEIPT FOR SERVING TO A TABLE
 self.InvCategory		= ListFetchOne[7]		# KENYA TIMS 0=RETAIL RECEIPT, 1=INVOICE, 2=CREDIT NOTE
 self.RelatedNum			= ListFetchOne[8]		# KENYA TIMS, if this is a CREDIT NOTE, here you need to have the DocNumAccum of the invoice which is credited
 self.ClerkCode			= ListFetchOne[9]		# The code of operator
@@ -59,3 +59,5 @@ self.QRCode			= ListFetchOne[57]		# KENYA TIMS see how to form this / GR is a di
 self.HeaderCode			= ListFetchOne[58]		# Read the actual text used in this receipt from static.headers - you need this text for do the _a.txt and HashA
 self.FooterCode			= ListFetchOne[59]		# Read the actual text used in this receipt from static.footers - you need this text to do the _a.txt and HashA
 self.FullAText			= ListFetchOne[60]		# GREECE ONLY - this is the PRINTED _a.txt - KENYA TIMS will use JSON, perhaps we can put the json text here
+self.Table			= ListFetchOne[61]		# table code if this is a restaurant ap
+self.Room			= ListFetchOne[62]		# room number for hotels

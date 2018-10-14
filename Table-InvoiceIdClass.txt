@@ -4,7 +4,7 @@ self.DocNumAccum		= DocNumAccum		# accumulating serial number of this rece/inv s
 self.DocNumMiddleware		= DocNumMiddleware		# KENYA TIMS this is the accumulating s/n of rec/inv with added Middleware ID
 self.IsOpen			= IsOpen		# 1=means this doc is open still, payment is pending, storage is pending, 0=closed
 self.IsCancelled 		= IsCancelled 		# 1=means this doc is canceled so all lines were re-written with ZERO and total is ZERO but NUMBERING continues
-self.InvType			= InvType		# KENYA TIMS 0=PROTOTYPE, 1=COPY, …???
+self.InvType			= InvType		# KENYA TIMS 0=PROTOTYPE, 1=COPY, … 9=TEMPORARY PARTIAL RECEIPT FOR SERVING TO A TABLE
 self.InvCategory		= InvCategory		# KENYA TIMS 0=RETAIL RECEIPT, 1=INVOICE, 2=CREDIT NOTE
 self.RelatedNum			= RelatedNum		# KENYA TIMS, if this is a CREDIT NOTE, here you need to have the DocNumAccum of the invoice which is credited
 self.ClerkCode			= ClerkCode		# The code of operator
@@ -59,3 +59,5 @@ self.QRCode			= QRCode		# KENYA TIMS see how to form this / GR is a different th
 self.HeaderCode			= HeaderCode		# Read the actual text used in this receipt from static.headers - you need this text for do the _a.txt and HashA
 self.FooterCode			= FooterCode		# Read the actual text used in this receipt from static.footers - you need this text to do the _a.txt and HashA
 self.FullAText			= FullAText		# GREECE ONLY - this is the PRINTED _a.txt - KENYA TIMS will use JSON, perhaps we can put the json text here
+self.Table			= Table		# table code if this is a restaurant ap
+self.Room			= Room		# room number for hotels

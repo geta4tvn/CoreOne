@@ -21,13 +21,14 @@ def create_connection(db_file):
         print(e)
     return None
 
-STAT=create_connection(dbStatic)         # ++++++++++++++   static.sqlite
+#STAT=create_connection(dbStatic)         # ++++++++++++++   static.sqlite
 JOURN=create_connection(dbJournal)       # ++++++++++++++   journal.sqlite
 
-global S
+#global S
 global J
-S=STAT.cursor()
-J=JOURN.cursor()
+#S=STAT.cursor()
+J=JOURN.cursor()   # IMPORTANT: JOURN is the CONNECTIOn and you use JOURN to commit() or close(), J is the CURSOR of the CONNECTION and you use this J for execute
+
 #==========================   SO J=THE CURSOR TO JOURNAL DATABASE AND S=THE CURSOR TO STATIC DB =========
 # STATIC db contains data that don't change often: DPT descriptions, VAT, PLU table, parameters, error messages, print templates etc.
 # JOURNAL db changes every time a new transaction happens or machine changes status: contains e-journal, current receipt, system state class

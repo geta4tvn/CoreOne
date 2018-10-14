@@ -83,6 +83,7 @@ class SyState(object):
         self.DemoMode       = DemoMode      # 0 = normal fiscal operation, 1 = demo mode, do not write to FM, ignore all FM related errors
         self.Zpending       = Zpending      # 0 = no pending Z, last Z completed OK,  1 = Z not completed due to errors, needs to be re-printed
 
+
     def ReadCurStat(self):
         #IMPORTANT: to read into the object you have to do it one attribute at a time like self.attri=readlist[n]
         global J
