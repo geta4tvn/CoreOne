@@ -48,12 +48,12 @@ J=JOURN.cursor()   # IMPORTANT: JOURN is the CONNECTIOn and you use JOURN to com
 class InvoiceId(object):
     def __init__(self,Znum, DocNum, DocNumAccum, DocNumMiddleware, IsOpen, IsCancelled , InvType, InvCategory, RelatedNum, \
                  ClerkCode, ClerkName, TimeStamp, Date, Time, TimeStampTransm, PinOfBuyer, CustCode, CustName, CustType, \
-                 CustDetails, Location, TotalPcs, TotalQty, TaxVatA, TaxVatB, TaxVatC, TaxVatD, TaxVatE, TaxVatExempt, \
-                 TaxAux, TotalAmntBefDiscnt, TotalDiscnts, TotalAmountPayable, TotalAmntPbleCurB, \
-                 CurrencyBRate, CoinQRforPayment, TotalTaxableA, TotalTaxableB, TotalTaxableC, TotalTaxableD, TotalTaxableE, \
-                 TotalTax , Pay1Amnt, Pay1Descr, Change, Pay2Amnt, Pay2Descr, Pay3Amnt, Pay3Desc, CouponId, \
-                 CouponAmnt, LoyaltyEarned, AmountOnCredit, CheckNum, DueDateforPayment, HashA, HashE, QRCode, \
-                 HeaderCode, FooterCode, FullAText):
+                 CustDetails, Location, TotalPcs, TotalQty, TaxVatA, TaxVatB, TaxVatC, TaxVatD, TaxVatE, TaxVatExempt, TaxAux, \
+                 TotalAmntBefDiscnt, TotalDiscnts, TotalAmountPayable, TotalAmntPbleCurB, CurrencyBRate, CoinQRforPayment, \
+                 TotalTaxableA, TotalTaxableB, TotalTaxableC, TotalTaxableD, TotalTaxableE, TotalTax , Pay1Amnt, Pay1Descr, \
+                 Change, Pay2Amnt, Pay2Descr, Pay3Amnt, Pay3Desc, CouponId, CouponAmnt, LoyaltyEarned, AmountOnCredit, CheckNum, \
+                 DueDateforPayment, HashA, HashE, QRCode, HeaderCode, FooterCode, FullAText, RestaurantTable, Room
+):
         self.Znum               = Znum              # this is the Z number where this receipt/invoice belongs to (pending to be issued)
         self.DocNum             = DocNum            # the serial number of this receipt/invoice for this Z (starts at 1 every new Z)
         self.DocNumAccum        = DocNumAccum       # accumulating serial number of this rece/inv since installation - KEY to fetch all the LINES of this receipt/inv from InvoiceLines
@@ -115,6 +115,8 @@ class InvoiceId(object):
         self.HeaderCode         = HeaderCode        # Read the actual text used in this receipt from static.headers - you need this text for do the _a.txt and HashA
         self.FooterCode         = FooterCode        # Read the actual text used in this receipt from static.footers - you need this text to do the _a.txt and HashA
         self.FullAText          = FullAText         # GREECE ONLY - this is the PRINTED _a.txt - KENYA TIMS will use JSON, perhaps we can put the json text here
+        self.RestaurantTable    = RestaurantTable   # just in case we need tables
+        self.Room               = Room              # hospitality app to charge room number
 
     # This will return the InvoiceId object from journal.InvoiceId
     # if parameter AccNum==999 it will fetch the LAST, CURRENT doc
@@ -191,8 +193,21 @@ class InvoiceId(object):
         self.HeaderCode         = ListFetchOne[58]  # Read the actual text used in this receipt from static.headers - you need this text for do the _a.txt and HashA
         self.FooterCode         = ListFetchOne[59]  # Read the actual text used in this receipt from static.footers - you need this text to do the _a.txt and HashA
         self.FullAText          = ListFetchOne[60]  # GREECE ONLY - this is the PRINTED _a.txt - KENYA TIMS will use JSON, perhaps we can put the json text here
+        self.RestaurantTable    = ListFetchOne[61]  # just in case we need tables
+        self.Room               = ListFetchOne[62]  # hospitality app to charge room number
 
-
-
+# ???????????????????????????????????????????????????????????????  INVOICELINES????  INVOICE ID!!!!!!
+    def InvIdWrite(self):
+        global J
+        J.execute(
+            "INSERT INTO InvoiceLines VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, \
+            ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
+            (self.Znum, self.DocNum, self.DocNumAccum, self.DocNumMiddleware, self.IsOpen, self.IsCancelled, self.InvType, self.InvCategory, self.RelatedNum, self.ClerkCode,
+             self.ClerkName, self.TimeStamp, self.Date, self.Time, self.TimeStampTransm, self.PinOfBuyer, self.CustCode, self.CustName, self.CustType, self.CustDetails,
+             self.Location, self.TotalPcs, self.TotalQty, self.TaxVatA, self.TaxVatB, self.TaxVatC, self.TaxVatD, self.TaxVatE, self.TaxVatExempt, self.TaxAux,
+             self.TotalAmntBefDiscnt, self.TotalDiscnts, self.TotalAmountPayable, self.TotalAmntPbleCurB, self.CurrencyBRate, self.CoinQRforPayment, self.TotalTaxableA,
+             self.TotalTaxableB, self.TotalTaxableC, self.TotalTaxableD, self.TotalTaxableE, self.TotalTax, self.Pay1Amnt, self.Pay1Descr, self.Change, self.Pay2Amnt,
+             self.Pay2Descr, self.Pay3Amnt, self.Pay3Desc, self.CouponId, self.CouponAmnt, self.LoyaltyEarned, self.AmountOnCredit, self.CheckNum, self.DueDateforPayment,
+             self.HashA, self.HashE, self.QRCode, self.HeaderCode, self.FooterCode, self.FullAText, self.Table, self.Room,))
 
 
