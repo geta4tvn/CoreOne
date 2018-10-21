@@ -37,15 +37,48 @@ def InputKeys():
 
     import CheckIn
     import time
-    import sqlite3              # I need the sqlite here to read in from static.sqlite, table keyblayouts the mapping between hardware codes and commands
-    from sqlite3 import Error
+    from datetime import datetime
 
-    now = time.time()
+    now=time.time()
+    global stampnow
+    stampnow=int(now)
+    #print(stampnow)
+    #print(datetime.utcfromtimestamp(stampnow).strftime('%Y-%m-%d %H:%M:%S'))    # gives the UTC time
+    #print(datetime.fromtimestamp(stampnow).strftime('%Y-%m-%d %H:%M:%S'))       # gives the local time from the TIMESTAMP which is a float if you need uicroseconds
+    DayMonthYearDate=datetime.fromtimestamp(stampnow).strftime('%d-%m-%Y')
+    DayMonthDate=datetime.fromtimestamp(stampnow).strftime('%d/%m')
+    DayNameMonthyear=datetime.fromtimestamp(stampnow).strftime('%d %b %y')
+    DayOfYear=datetime.fromtimestamp(stampnow).strftime('%j')
+    WeekOfYear=datetime.fromtimestamp(stampnow).strftime('%W')
+    NameOfDay=datetime.fromtimestamp(stampnow).strftime('%a')
+    HourMinAMPM=datetime.fromtimestamp(stampnow).strftime('%I:%M %p')
+    HourMin=datetime.fromtimestamp(stampnow).strftime('%H:%M')
+    #print('finally a date from timestamp float=', DayMonthYearDate)
+    #print('Just day and month: ',DayMonthDate)
+    #print('The abbrev month name:',DayNameMonthyear)
+    #print('This is the number of the day in the year: ',DayOfYear, '  and week of year is ',WeekOfYear)
+    #print('The abbrev name of day - use %A for full name: ',NameOfDay)
+    print('Hour in 24h form =', HourMin, 'Hour in 12h am pm form=', HourMinAMPM)
+
 
     folder='C:\\Tevin\\CoreOne\\'
     arxeio=folder+'TestKeysIn.txt'
-    #time.sleep(1)
 
+    global logfile
+    logfile=folder+"logfile.txt"
+
+    def ErrorLog(x):
+        global logfile
+        log=open(logfile,'a')
+        EventTime=time.time()
+        event=time.ctime(EventTime)
+        log.write(event +'\n')
+        log.write(x+'\n\n')
+        log.close()
+        return
+
+
+    #time.sleep(1)
     # ======================================================================================================================================
     # This will read commands and data from a test input file (/CharmSources/TestKeysIn.txt) and separate the incoming data into tokens (numbers and commands)
     # When using a test input file, we are using the commands and NOT THE KEYBOARD HARDWARE CODES to generate the input
