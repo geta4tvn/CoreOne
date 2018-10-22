@@ -88,18 +88,19 @@ def InputKeys():
     # nnn..nnX : any number of digits in front of X: quantity (3 decimals) multiplier
     # nnn..nnr : any number of digits in front of r: price of PLU
     # p<description>
+    counter=1
+    while counter<4:
+        ReadFile=open(arxeio,"r")
+        for line in ReadFile.readlines():
+            for x in line:
+                if x>chr(32):       # do NOT send LF, CR and other controls
+                   # print('>>',x)
+                    CheckIn.CheckIn(x)
 
-    ReadFile=open(arxeio,"r")
-    for line in ReadFile.readlines():
-        for x in line:
-            if x>chr(32):       # do NOT send LF, CR and other controls
-               # print('>>',x)
-                CheckIn.CheckIn(x)
-
-    stopped=time.time()
-
-    duration=int(1000*(stopped-now))
-    print('THE WHOLE THING TOOK ',duration,'msec')
+        stopped=time.time()
+        counter=counter+1
+        duration=int(1000*(stopped-now))
+        print('THE WHOLE THING TOOK ',duration,'msec'+'   ----- COUNTER =',counter)
 
 if __name__ == "__main__":
     InputKeys()

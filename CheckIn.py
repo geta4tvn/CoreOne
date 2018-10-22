@@ -25,7 +25,7 @@
 import sqlite3
 from sqlite3 import Error
 import Execution
-import AllJournalClasses
+import AllJournalClasses as AJC
 import time
 import time
 from datetime import datetime
@@ -116,7 +116,7 @@ QtyB=''
 # NewLine is the INSTANCE OF CLASS InvoiceLines and is generated for every line that is logically complete, that is has enough
 # data to be executable
 global NewLine
-NewLine=AllJournalClasses.InvoiceLines(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, \
+NewLine=AJC.InvoiceLines(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, \
                                        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
 
 
@@ -137,14 +137,12 @@ def fT(a,b):            # Department command function, where a=the DepartmentCod
         NewLine.PluDpt=a
         NewLine.DptDescr=dptData[0]
         NewLine.UnitPrice=b
-        NewLine.LineNum=stampnow
-
-
-        ErrorLog('Found '+NewLine.DptDescr+' Price='+NewLine.UnitPrice+' Qty='+NewLine.QTY1)
-        return
+        Execution.ektelese(NewLine)  # IMPORTANT: SEND TO EXECUTION FROM THIS POINT - THE FUNCTION KNOWS THAT DEPART IS ENDING A TRANSACTION
+        ErrorLog('Found '+str(NewLine.DptDescr)+' Price='+str(NewLine.UnitPrice)+' Qty='+str(NewLine.QTY1))
+    return
 
 #..........................................................................................
-def fP(a,b):  # PLU command function
+def fP(a,b):            # PLU command function
     global S
     S.execute("SELECT description, department, category, price1, active  FROM plu WHERE barcode=?", (b,))
     pluData = S.fetchone()
@@ -269,7 +267,7 @@ def CheckIn(x):
         endCmd=Commands[x][2]
         if postCmd==0:
             Commands[CmdIn][3](x,TokeNumPre)
-            if endCmd==0:       # if the command is NOT ending the transaction (like the X) then  you do not passon anything, wait for a command that is capable of ending
+            if endCmd==0:                   # if the command is NOT ending the transaction (like the X) then  you do not passon anything, wait for a command that is capable of ending
                 Execution.ektelese(NewLine)
 
 
@@ -286,19 +284,16 @@ def CheckIn(x):
                 TokeNumPre=''
                 CmdIn=''
                 CmdInCode=''
-                Execution.ektelese(NewLine)
+
         elif ActiveCmd==1 and preCmd==7:    # this is special for X command (preCmd=7 for X multiplication)
             QtyA=TokeNumPre
             TokeNumPre=''
             TokeNumPre=TokeNumPre+x
             ActiveCmd=0
 
-
-
-
 #--------------------------------------------------  if x is NOT Command but NOT a number also
     elif x not in Commands and not '-'< x <':':
-        print('ERROR INPUT or COMMENT/FREE TEXT')
+        ErrorLog('-CheckIn.py - line 296 - ERROR INPUT or COMMENT/FREE TEXT')
 
 
     return
@@ -307,16 +302,6 @@ def CheckIn(x):
 #===============================================================================================================================
 #===============================================================================================================================
 
-
-
-# TODO do not leave checkin unless the command entered is an "ending" command, for example X does not leave here, T01 will leave
-
-def PassOn(x):
-
-    print('>>>>>>>>>>>>>>>  Pass to Execution')
-    #Execution.ektelese(NewLine)  # TODO here is first attempt to pass a class object to another module
-    print(NewLine.DptDescr)
-    return
 
 
 #-------------------------------------  END OF MODULE CheckIn.py ---------------------------------------------------------
