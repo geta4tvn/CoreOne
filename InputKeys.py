@@ -77,7 +77,6 @@ def InputKeys():
         log.close()
         return
 
-
     #time.sleep(1)
     # ======================================================================================================================================
     # This will read commands and data from a test input file (/CharmSources/TestKeysIn.txt) and separate the incoming data into tokens (numbers and commands)
@@ -89,7 +88,7 @@ def InputKeys():
     # nnn..nnr : any number of digits in front of r: price of PLU
     # p<description>
     counter=1
-    while counter<4:
+    while counter<2:
         ReadFile=open(arxeio,"r")
         for line in ReadFile.readlines():
             for x in line:
@@ -101,10 +100,10 @@ def InputKeys():
         counter=counter+1
         duration=int(1000*(stopped-now))
         print('THE WHOLE THING TOOK ',duration,'msec'+'   ----- COUNTER =',counter)
-
+        ErrorLog('----------------- WHOLE THING DURATION: '+str(duration)+'msec'+'  ---------- COUNTER='+str(counter))
 if __name__ == "__main__":
     InputKeys()
-                    
+
 
 
     # line=re.sub('[\s+]','',line)    #(from re) this one from re library substitutes all spaces with nul

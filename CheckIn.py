@@ -24,7 +24,7 @@
 
 import sqlite3
 from sqlite3 import Error
-import Execution
+import Execution as EXE
 import AllJournalClasses as AJC
 import time
 import time
@@ -128,7 +128,7 @@ def fT(a,b):            # Department command function, where a=the DepartmentCod
     global NewLine
     global stampnow
 
-    S.execute("SELECT DptDescr, VATClass, CategoryCode, DptPrice1  FROM dpt WHERE DptCode=?",(a,))
+    S.execute("SELECT DptDescr, VATClass, CategoryCode, DptPrice1 FROM dpt WHERE DptCode=?", (a,))
     dptData = S.fetchone()
     if dptData is None:
         ErrorLog('Error 101-CheckIn-fT(a,b)-Department not found')
@@ -137,27 +137,38 @@ def fT(a,b):            # Department command function, where a=the DepartmentCod
         NewLine.PluDpt=a
         NewLine.DptDescr=dptData[0]
         NewLine.UnitPrice=b
-        Execution.ektelese(NewLine)  # IMPORTANT: SEND TO EXECUTION FROM THIS POINT - THE FUNCTION KNOWS THAT DEPART IS ENDING A TRANSACTION
-        ErrorLog('Found '+str(NewLine.DptDescr)+' Price='+str(NewLine.UnitPrice)+' Qty='+str(NewLine.QTY1))
+        ErrorLog('Found ' + str(NewLine.DptDescr) + ' Price=' + str(NewLine.UnitPrice) + ' Qty=' + str(NewLine.QTY1))
+        EXE.ektelese(NewLine)  # IMPORTANT: SEND TO EXECUTION FROM THIS POINT - THE FUNCTION KNOWS THAT DEPART IS ENDING A TRANSACTION
+
     return
 
 #..........................................................................................
-def fP(a,b):            # PLU command function
+def fP(a,b):                        # PLU command function
     global S
-    S.execute("SELECT description, department, category, price1, active  FROM plu WHERE barcode=?", (b,))
+    c=int(b) # seems Barcode needs integer and we get b as string from the inkeys, so converting to int is needed
+    S.execute("SELECT Description, dpt, cat, price1, active FROM plu WHERE Barcode=?", (c,))
+    #S.execute("SELECT Description, dpt, cat, price1, active FROM plu WHERE Barcode=10001")
     pluData = S.fetchone()
-    if pluData is not None:  # comparison with None is done using is / is not. It is an ERROR IF we use ==
+    if pluData is not None:         # comparison with None is done using is / is not. It is an ERROR IF we use ==
         active=pluData[4]
-
-    if pluData is None:
-        return
-    else:
         if active==0:
-            pluData='Item is not active'
-            return pluData
+            ErrorLog('CheckIn-fP-Line 157 - NOT ACTIVE!')
+            return
+        if active!=0:
+            NewLine.Command='P'
+            NewLine.CommandID=b
+            NewLine.PluDescr=pluData[0]
+            NewLine.UnitPrice=pluData[3]
+            NewLine.PluDpt=pluData[1]
+            EXE.ektelese(NewLine)
+
+    else:
+        ErrorLog('CheckIn-fP-Line 164 - no plu data')
         return
+    return
+
 #..........................................................................................
-def fp():  # PLU DESCRIPTION command function
+def fp():  # PLU DESCRIPTION command function (use as fiscal printer where description comes from outside)
     pass
 #..........................................................................................
 def fE():  # END/CLOSE receipt command function
@@ -268,7 +279,7 @@ def CheckIn(x):
         if postCmd==0:
             Commands[CmdIn][3](x,TokeNumPre)
             if endCmd==0:                   # if the command is NOT ending the transaction (like the X) then  you do not passon anything, wait for a command that is capable of ending
-                Execution.ektelese(NewLine)
+                EXE.ektelese(NewLine)
 
 
 #------------------------------------------------- if x is NOT Command but a number  // HANDLES Tnn or commands that have POST codes
@@ -293,7 +304,7 @@ def CheckIn(x):
 
 #--------------------------------------------------  if x is NOT Command but NOT a number also
     elif x not in Commands and not '-'< x <':':
-        ErrorLog('-CheckIn.py - line 296 - ERROR INPUT or COMMENT/FREE TEXT')
+        ErrorLog('-CheckIn.py - line approx 305 - ERROR INPUT or COMMENT/FREE TEXT')
 
 
     return
