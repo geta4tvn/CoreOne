@@ -31,13 +31,17 @@ def InputKeys():
 
 # I have opened account geta4tvn at github with passw Q2 and then installed git in Dell
 # Then used VCS > Import into version control > Share Project on GitHub where I successfuly created repository EngineOneCore
-#
+# When using a test input file, we are using the commands and NOT THE KEYBOARD HARDWARE CODES to generate the input
+#  The COMMANDS understood by the system are described in CASH REGISTER ENGINE ANALYSIS.XLSX but are also given below:
 
 
 
     import CheckIn
     import time
     from datetime import datetime
+    import sqlite3
+    from sqlite3 import Error
+
 
     now=time.time()
     global stampnow
@@ -77,24 +81,51 @@ def InputKeys():
         log.close()
         return
 
-    #time.sleep(1)
-    # ======================================================================================================================================
-    # This will read commands and data from a test input file (/CharmSources/TestKeysIn.txt) and separate the incoming data into tokens (numbers and commands)
-    # When using a test input file, we are using the commands and NOT THE KEYBOARD HARDWARE CODES to generate the input
-    # The COMMANDS understood by the system are described in CASH REGISTER ENGINE ANALYSIS.XLSX but are also given below:
-    # Tnn : department + nn two digit department code
-    # nnn..nnP : any number of digits in front of P: the PLU barcode/code
-    # nnn..nnX : any number of digits in front of X: quantity (3 decimals) multiplier
-    # nnn..nnr : any number of digits in front of r: price of PLU
-    # p<description>
+    #===================================  RUN ONCE ON STARTUP TO PREPARE SYSTEM WITH VAT RATES, STATE FLAGS, CLERK LOGIN, HARDWARE CHECKS=======
+    #-------------------------------------------------------------------------------------------------------------------------------------------
+    dbStatic = 'C:\\Tevin\\CoreOne\\static.sqlite'
+    # ======================  PATH TO USE IF IN  LINUX  =====================================================================
+    # dbStatic='/usr/ecr/static.sqlite'
+    # dbJournal='/usr/ecr/journal.sqlite'
+
+    def create_connection(db_file):
+        try:
+            conn = sqlite3.connect(db_file)
+            return conn
+        except Error as e:
+            ErrorLog('InputKeys-create con Error'+e)
+        return None
+
+    STAT = create_connection(dbStatic)      # ++++++++++++++   static.sqlite
+    S = STAT.cursor()
+
+    # HOW TO SELECT THE ROW HOLDING THE MAXIMUM OF A CERTAIN COLUMN
+    S.execute("SELECT * FROM VATRates WHERE TimeStampEntered=(SELECT MAX(TimeStampEntered) FROM VATRates)")
+    VatData = S.fetchone()
+    global VAT
+    VAT=[0,0,0,0,0,0,0,0,0]                 # You MUST initialize a list like this....
+    VAT[0]=VatData[6]   # Read ONCE ON STARTUP to get the current VAT Rates from static.VATRates table
+    VAT[1]=VatData[2]   # This is VATA
+    VAT[2]=VatData[3]   # This is VATB
+    VAT[3]=VatData[4]   # This is VATC
+    VAT[4]=VatData[5]   # This is VATD
+    VAT[5]=VatData[6]   # This is VATE
+    # The idea is to have all VAT rates at hand WITHOUT READING THE SQLITE EVERY TIME....
+    # As long as there is power... you have the VAT in a list in memory..................
+    print('On startup, readings of VAT rates give: VATA=',VAT[1], '  VATB=', VAT[2], 'VATC=', VAT[3], 'VATD=',VAT[4], 'VATE=',VAT[5])
+
+    STAT.close()        # Close this connection, we are done with getting the vat rates on startup
+
+#===================================  MAIN BODY HERE - READS FROM AN INPUT FILE (OR OTHER INPUT) ========================================
+    #----------------------------------------------------------------------------------------------------------------------------------------
     counter=1
     while counter<2:
         ReadFile=open(arxeio,"r")
         for line in ReadFile.readlines():
             for x in line:
-                if x>chr(32):       # do NOT send LF, CR and other controls
+                if x>chr(32):               # do NOT send LF, CR and other controls
                    # print('>>',x)
-                    CheckIn.CheckIn(x)
+                    CheckIn.CheckIn(x,VAT)  # PASSES THE VAT LIST AS SECOND PARAMETER HERE, tried to make it global but it will not work....
 
         stopped=time.time()
         counter=counter+1
@@ -105,7 +136,7 @@ if __name__ == "__main__":
     InputKeys()
 
 
-
+    #================================ EXAMPLES OF re MODULE (REGULAR EXPRESSION STRING MANIPULATION ================================================
     # line=re.sub('[\s+]','',line)    #(from re) this one from re library substitutes all spaces with nul
     # line=re.sub(',',', ',line)      #use again the substitute function to insert a space after a coma
     # words=line.split()              #(from re) the text.split() function will turn a string into a list provided you have words separated by ", "

@@ -27,11 +27,11 @@ from sqlite3 import Error
 import Execution as EXE
 import AllJournalClasses as AJC
 import time
-import time
 from datetime import datetime
 
+
 now=time.time()
-global stampnow
+#global stampnow
 stampnow=int(now)
 
 folder='C:\\Tevin\\CoreOne\\'
@@ -127,6 +127,9 @@ def fT(a,b):            # Department command function, where a=the DepartmentCod
     global S            # The function by itself knows that Tnn command is EXECUTE NOW command but the same is set in endCmd=0
     global NewLine
     global stampnow
+    #global VAT   looks like you DO NOT need to declare VAT global inside the fT -
+    # PERHAPS you ONLY need the global declaration if fT will ALTER the VAT for other modules
+    # in this case we only READ from VAT
 
     S.execute("SELECT DptDescr, VATClass, CategoryCode, DptPrice1 FROM dpt WHERE DptCode=?", (a,))
     dptData = S.fetchone()
@@ -138,6 +141,7 @@ def fT(a,b):            # Department command function, where a=the DepartmentCod
         NewLine.DptDescr=dptData[0]
         NewLine.UnitPrice=b
         ErrorLog('Found ' + str(NewLine.DptDescr) + ' Price=' + str(NewLine.UnitPrice) + ' Qty=' + str(NewLine.QTY1))
+        print('THIS IS THE DEPT fT, I get VAT like this:', VAT[1], VAT[2], VAT[3])
         EXE.ektelese(NewLine)  # IMPORTANT: SEND TO EXECUTION FROM THIS POINT - THE FUNCTION KNOWS THAT DEPART IS ENDING A TRANSACTION
 
     return
@@ -145,9 +149,10 @@ def fT(a,b):            # Department command function, where a=the DepartmentCod
 #..........................................................................................
 def fP(a,b):                        # PLU command function
     global S
+    #global VAT ??????????????? You don't need to declare global VAT here,
+
     c=int(b) # seems Barcode needs integer and we get b as string from the inkeys, so converting to int is needed
     S.execute("SELECT Description, dpt, cat, price1, active FROM plu WHERE Barcode=?", (c,))
-    #S.execute("SELECT Description, dpt, cat, price1, active FROM plu WHERE Barcode=10001")
     pluData = S.fetchone()
     if pluData is not None:         # comparison with None is done using is / is not. It is an ERROR IF we use ==
         active=pluData[4]
@@ -160,6 +165,7 @@ def fP(a,b):                        # PLU command function
             NewLine.PluDescr=pluData[0]
             NewLine.UnitPrice=pluData[3]
             NewLine.PluDpt=pluData[1]
+            print('THIS IS THE PLU fP, I get VAT like this:', VAT[1], VAT[2], VAT[3])
             EXE.ektelese(NewLine)
 
     else:
@@ -247,7 +253,7 @@ Commands={'T': [8,2,0,fT],     # DEPARTMENT    * 8=pre-command price or qtyXpric
 # To use some variables in the manner of TokeNumPre=TokeNumPre+x you need to declare TokeNumPre as GLOBAL
 # AND INITIALIZE it like TokeNumPre='' OUTSIDE of the function, and then declare it GLOBAL AGAIN inside function
 
-def CheckIn(x):
+def CheckIn(x,y):       # y is the VAT[] list coming in from InputKeys. It didn't work when I put VAT in here, parameter / variable conflict
     global CmdIn
     global CmdInCode
     global TokeNumPre
@@ -263,8 +269,11 @@ def CheckIn(x):
     global QtyA
     global QtyB
 
+    global VAT          # seems global is needed here, right before the assignement of this module's environment VAT=y where y is a parameter of CheckIn(x,y)
+    VAT=y
 
-    InSeries.append(x)      # this is a list of the input series of characters/keystrokes/input
+
+    #InSeries.append(x)      # this is a list of the input series of characters/keystrokes/input
     
 #===============================================================================================================================
 #===============================================================================================================================
