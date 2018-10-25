@@ -53,8 +53,8 @@ def ErrorLog(x):
 
 #=======================================================================================================================
 #=======================    ACCESS THE TWO DATABASES: STATIC AND JOURNAL     ===========================================
-# dbStatic='C:\\000 WORK 2017\\2 general\\00 2018 Tevin\\OUR ETR\\CharmSources\\static.sqlite'
-# dbJournal='C:\\000 WORK 2017\\2 general\\00 2018 Tevin\\OUR ETR\\CharmSources\\journal.sqlite'
+
+#======================  WINDOWS PATH
 dbStatic='C:\\Tevin\\CoreOne\\static.sqlite'
 dbJournal='C:\\Tevin\\CoreOne\\journal.sqlite'
 
@@ -115,7 +115,9 @@ QtyB=''
 
 # NewLine is the INSTANCE OF CLASS InvoiceLines and is generated for every line that is logically complete, that is has enough
 # data to be executable
-global NewLine
+
+# !!! seems it does not make a difference to set "global"
+#global NewLine
 NewLine=AJC.InvoiceLines(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, \
                                        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
 
@@ -140,9 +142,10 @@ def fT(a,b):            # Department command function, where a=the DepartmentCod
         NewLine.PluDpt=a
         NewLine.DptDescr=dptData[0]
         NewLine.UnitPrice=b
+        NewLine.VATRate=dptData[1]
         ErrorLog('Found ' + str(NewLine.DptDescr) + ' Price=' + str(NewLine.UnitPrice) + ' Qty=' + str(NewLine.QTY1))
         print('THIS IS THE DEPT fT, I get VAT like this:', VAT[1], VAT[2], VAT[3])
-        EXE.ektelese(NewLine)  # IMPORTANT: SEND TO EXECUTION FROM THIS POINT - THE FUNCTION KNOWS THAT DEPART IS ENDING A TRANSACTION
+        EXE.ektelese(NewLine, VAT)  # IMPORTANT: SEND TO EXECUTION FROM THIS POINT - THE FUNCTION KNOWS THAT DEPART IS ENDING A TRANSACTION
 
     return
 
@@ -165,8 +168,13 @@ def fP(a,b):                        # PLU command function
             NewLine.PluDescr=pluData[0]
             NewLine.UnitPrice=pluData[3]
             NewLine.PluDpt=pluData[1]
-            print('THIS IS THE PLU fP, I get VAT like this:', VAT[1], VAT[2], VAT[3])
-            EXE.ektelese(NewLine)
+            #-------- PLU gives the department code and we need to find the VAT rate of this dpt:
+            S.execute("SELECT VATClass from dpt WHERE DptCode=?",(NewLine.PluDpt,))
+            dptvat=S.fetchone()
+            NewLine.VATRate=VAT[dptvat[0]]
+            #------------------------------------------------------------------------------------
+            print('This is a PLU read, from dpt code the VAT rate is =', NewLine.VATRate)
+            EXE.ektelese(NewLine, VAT)
 
     else:
         ErrorLog('CheckIn-fP-Line 164 - no plu data')
@@ -174,11 +182,19 @@ def fP(a,b):                        # PLU command function
     return
 
 #..........................................................................................
-def fp():  # PLU DESCRIPTION command function (use as fiscal printer where description comes from outside)
+def fp(a,b):  # PLU DESCRIPTION command function (use as fiscal printer where description comes from outside)
+
+
     pass
 #..........................................................................................
-def fE():  # END/CLOSE receipt command function
-    pass
+def fE(a,b):  # END/CLOSE receipt command function
+    print('this is fE, a =', a)
+    print('this is fE  b =', b)
+    NewLine.Command = 'E'
+    NewLine.CommandID = b
+    NewLine.PayCode = a
+    EXE.kleise(NewLine)
+    return
 
 #..........................................................................................
 def fX(a,b):  # QUANTITY/MULTIPL command function
@@ -288,7 +304,7 @@ def CheckIn(x,y):       # y is the VAT[] list coming in from InputKeys. It didn'
         if postCmd==0:
             Commands[CmdIn][3](x,TokeNumPre)
             if endCmd==0:                   # if the command is NOT ending the transaction (like the X) then  you do not passon anything, wait for a command that is capable of ending
-                EXE.ektelese(NewLine)
+                EXE.ektelese(NewLine, VAT)
 
 
 #------------------------------------------------- if x is NOT Command but a number  // HANDLES Tnn or commands that have POST codes

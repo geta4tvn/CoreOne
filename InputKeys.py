@@ -44,7 +44,7 @@ def InputKeys():
 
 
     now=time.time()
-    global stampnow
+    #global stampnow
     stampnow=int(now)
     #print(stampnow)
     #print(datetime.utcfromtimestamp(stampnow).strftime('%Y-%m-%d %H:%M:%S'))    # gives the UTC time
