@@ -39,13 +39,15 @@ global logfile
 logfile = folder + "logfile.txt"
 
 
-def ErrorLog(x):
+def ErrorLog(x,T):
     global logfile
-    log = open(logfile, 'a')
-    EventTime = time.time()
-    event = time.ctime(EventTime)
-    log.write(event + '\n')
-    log.write(x + '\n\n')
+    log=open(logfile,'a')
+    if T==1:
+        EventTime=time.time()
+        event=time.ctime(EventTime)
+        log.write(event +'\n')
+        del event, EventTime
+    log.write(x+'\n\n')
     log.close()
     return
 
@@ -127,8 +129,7 @@ NewLine=AJC.InvoiceLines(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 #-------------------------------------------------------------------------------------------------------------------------------
 def fT(a,b):            # Department command function, where a=the DepartmentCode and b=the number BEFORE this code (that is the PRICE)
     global S            # The function by itself knows that Tnn command is EXECUTE NOW command but the same is set in endCmd=0
-    global NewLine
-    global stampnow
+
     #global VAT   looks like you DO NOT need to declare VAT global inside the fT -
     # PERHAPS you ONLY need the global declaration if fT will ALTER the VAT for other modules
     # in this case we only READ from VAT
@@ -136,17 +137,17 @@ def fT(a,b):            # Department command function, where a=the DepartmentCod
     S.execute("SELECT DptDescr, VATClass, CategoryCode, DptPrice1 FROM dpt WHERE DptCode=?", (a,))
     dptData = S.fetchone()
     if dptData is None:
-        ErrorLog('Error 101-CheckIn-fT(a,b)-Department not found')
+        ErrorLog('Error 101-CheckIn-fT(a,b)-Department not found', 1)
 
     else:
         NewLine.PluDpt=a
         NewLine.DptDescr=dptData[0]
         NewLine.UnitPrice=b
-        NewLine.VATRate=dptData[1]
-        ErrorLog('Found ' + str(NewLine.DptDescr) + ' Price=' + str(NewLine.UnitPrice) + ' Qty=' + str(NewLine.QTY1))
-        print('THIS IS THE DEPT fT, I get VAT like this:', VAT[1], VAT[2], VAT[3])
-        EXE.ektelese(NewLine, VAT)  # IMPORTANT: SEND TO EXECUTION FROM THIS POINT - THE FUNCTION KNOWS THAT DEPART IS ENDING A TRANSACTION
-
+        NewLine.VATRate=VAT[dptData[1]]
+        #----------------------------------------------------------------------------------------------------------------------------------
+        EXE.ektelese(NewLine)   # IMPORTANT: SEND TO EXECUTION FROM THIS POINT - THE FUNCTION KNOWS THAT DEPART IS ENDING A TRANSACTION
+        #----------------------------------------------------------------------------------------------------------------------------------
+        ClearAll()              # this clears the variables used in PARSING THE INPUT so we can start all over on clean variables
     return
 
 #..........................................................................................
@@ -160,7 +161,7 @@ def fP(a,b):                        # PLU command function
     if pluData is not None:         # comparison with None is done using is / is not. It is an ERROR IF we use ==
         active=pluData[4]
         if active==0:
-            ErrorLog('CheckIn-fP-Line 157 - NOT ACTIVE!')
+            ErrorLog('CheckIn-fP-Line 157 - NOT ACTIVE!', 1)
             return
         if active!=0:
             NewLine.Command='P'
@@ -169,15 +170,17 @@ def fP(a,b):                        # PLU command function
             NewLine.UnitPrice=pluData[3]
             NewLine.PluDpt=pluData[1]
             #-------- PLU gives the department code and we need to find the VAT rate of this dpt:
-            S.execute("SELECT VATClass from dpt WHERE DptCode=?",(NewLine.PluDpt,))
+            S.execute("SELECT VATClass from dpt WHERE DptCode=?", (NewLine.PluDpt,))
             dptvat=S.fetchone()
             NewLine.VATRate=VAT[dptvat[0]]
-            #------------------------------------------------------------------------------------
-            print('This is a PLU read, from dpt code the VAT rate is =', NewLine.VATRate)
-            EXE.ektelese(NewLine, VAT)
+            #----------------------------------------------------------------------------------------------------------------------------
+            EXE.ektelese(NewLine)   # IMPORTANT: SEND TO EXECUTION FROM THIS POINT - THE FUNCTION KNOWS THAT PLU  IS ENDING A TRANSACTION
+            #----------------------------------------------------------------------------------------------------------------------------
+            ClearAll()              # this clears the variables used in PARSING THE INPUT so we can start all over on clean variables
+
 
     else:
-        ErrorLog('CheckIn-fP-Line 164 - no plu data')
+        ErrorLog('CheckIn-fP-Line 164 - no plu data', 1)
         return
     return
 
@@ -188,12 +191,15 @@ def fp(a,b):  # PLU DESCRIPTION command function (use as fiscal printer where de
     pass
 #..........................................................................................
 def fE(a,b):  # END/CLOSE receipt command function
-    print('this is fE, a =', a)
-    print('this is fE  b =', b)
     NewLine.Command = 'E'
-    NewLine.CommandID = b
+    NewLine.CommandID = a
     NewLine.PayCode = a
-    EXE.kleise(NewLine)
+    NewLine.PayAmnt = b
+    #------------------------------------------------------------------------------------------------
+    EXE.kleise(NewLine)     # this is END of RECEIPT with payment and calls kleise function
+    #                         If payment is NOT EQUAL to TOTAL, another payment(s) is expected
+    #------------------------------------------------------------------------------------------------
+    ClearAll()
     return
 
 #..........................................................................................
@@ -237,6 +243,32 @@ def fM():   # MENU command function
 #..........................................................................................
 def fK():   # CLERK login function - check for password
     pass
+
+#..........................................................................................
+def ClearAll():
+    global CmdIn
+    global CmdInCode
+    global TokeNumPre
+    global TokeNumPost
+    global CountCmd
+    global CountNum
+    global count
+    global ActiveCmd
+    global InSeries
+    global preCmd
+    global postCmd
+    global endCmd
+    global QtyA
+    global QtyB
+    CmdIn=''
+    CmdInCode=''
+    TokeNumPre=''
+    TokeNumPost=''
+    ActiveCmd=0
+
+    return
+
+
 # ------------------------  END OF COMMAND FUNCTIONS ------------------------------------------------------------
 #----------------------------------------------------------------------------------------------------------------
 # Functions MUST PRECEDE the Commands dictionary, otherwise they are not recognized inside the dictionary -------
@@ -303,12 +335,12 @@ def CheckIn(x,y):       # y is the VAT[] list coming in from InputKeys. It didn'
         endCmd=Commands[x][2]
         if postCmd==0:
             Commands[CmdIn][3](x,TokeNumPre)
-            if endCmd==0:                   # if the command is NOT ending the transaction (like the X) then  you do not passon anything, wait for a command that is capable of ending
-                EXE.ektelese(NewLine, VAT)
+            #if endCmd==0:         # if endCommand is 0 this means we can move to execution, this command is ENDING COMMAND
+            #    EXE.ektelese(NewLine, VAT)
 
 
 #------------------------------------------------- if x is NOT Command but a number  // HANDLES Tnn or commands that have POST codes
-    elif x not in Commands and '-'< x <':': # the input will EITHER contain COMMAND or DATA
+    elif x not in Commands and '-'< x <':': # the input will EITHER contain COMMAND or DATA, here we EXPECT NUMBERS
         if ActiveCmd==0:                    # if there is no command received, we assume that we need to gather the data as some number
             TokeNumPre=TokeNumPre+x         # and store it in TokeNumPre, which is the PRE-COMMAND NUMBER
         elif ActiveCmd==1 and postCmd!=0:   # this is after T, V, E commands that take nn or nnnn arguments
@@ -329,7 +361,7 @@ def CheckIn(x,y):       # y is the VAT[] list coming in from InputKeys. It didn'
 
 #--------------------------------------------------  if x is NOT Command but NOT a number also
     elif x not in Commands and not '-'< x <':':
-        ErrorLog('-CheckIn.py - line approx 305 - ERROR INPUT or COMMENT/FREE TEXT')
+        ErrorLog('-CheckIn.py - line approx 305 - ERROR INPUT or COMMENT/FREE TEXT', 1)
 
 
     return

@@ -71,12 +71,14 @@ def InputKeys():
     global logfile
     logfile=folder+"logfile.txt"
 
-    def ErrorLog(x):
+    def ErrorLog(x,T):
         global logfile
         log=open(logfile,'a')
-        EventTime=time.time()
-        event=time.ctime(EventTime)
-        log.write(event +'\n')
+        if T==1:
+            EventTime=time.time()
+            event=time.ctime(EventTime)
+            log.write(event +'\n')
+            del event, EventTime
         log.write(x+'\n\n')
         log.close()
         return
@@ -93,7 +95,7 @@ def InputKeys():
             conn = sqlite3.connect(db_file)
             return conn
         except Error as e:
-            ErrorLog('InputKeys-create con Error'+e)
+            ErrorLog('InputKeys-create con Error'+e,1)
         return None
 
     STAT = create_connection(dbStatic)      # ++++++++++++++   static.sqlite
@@ -131,7 +133,7 @@ def InputKeys():
         counter=counter+1
         duration=int(1000*(stopped-now))
         print('THE WHOLE THING TOOK ',duration,'msec'+'   ----- COUNTER =',counter)
-        ErrorLog('----------------- WHOLE THING DURATION: '+str(duration)+'msec'+'  ---------- COUNTER='+str(counter))
+        ErrorLog('----------------- WHOLE THING DURATION: '+str(duration)+'msec'+'  ---------- COUNTER='+str(counter), 0)
 if __name__ == "__main__":
     InputKeys()
 
